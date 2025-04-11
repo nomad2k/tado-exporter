@@ -253,16 +253,23 @@ func (c *Collector) collectZoneDevices(zone poller.Zone) {
 
 func (c *Collector) collectZoneInfo(zone poller.Zone) {
 	zoneName := *zone.Name
-	if zone.SensorDataPoints.InsideTemperature != nil {
-		c.Metrics.tadoZoneTemperatureCelsius.WithLabelValues(zoneName).Set(float64(*zone.SensorDataPoints.InsideTemperature.Celsius))
+	if zone.SensorDataPoints != nil {
+		if zone.SensorDataPoints.InsideTemperature != nil {
+			c.Metrics.tadoZoneTemperatureCelsius.WithLabelValues(zoneName).Set(float64(*zone.SensorDataPoints.InsideTemperature.Celsius))
+		}
+		if zone.SensorDataPoints.Humidity != nil {
+			c.Metrics.tadoZoneHumidityPercentage.WithLabelValues(zoneName).Set(float64(*zone.SensorDataPoints.Humidity.Percentage))
+		}
 	}
+
+	if zone.ActivityDataPoints != nil {
+		if zone.ActivityDataPoints.HeatingPower != nil {
+			c.Metrics.tadoZoneHeatingPercentage.WithLabelValues(zoneName).Set(float64(*zone.ActivityDataPoints.HeatingPower.Percentage))
+		}
+	}
+
 	c.Metrics.tadoZoneTargetTempCelsius.WithLabelValues(zoneName).Set(float64(zone.GetTargetTemperature()))
-	if zone.ActivityDataPoints.HeatingPower != nil {
-		c.Metrics.tadoZoneHeatingPercentage.WithLabelValues(zoneName).Set(float64(*zone.ActivityDataPoints.HeatingPower.Percentage))
-	}
-	if zone.SensorDataPoints.Humidity != nil {
-		c.Metrics.tadoZoneHumidityPercentage.WithLabelValues(zoneName).Set(float64(*zone.SensorDataPoints.Humidity.Percentage))
-	}
+
 	var duration, remaining float64
 	if zone.OpenWindow != nil {
 		duration = float64(*zone.OpenWindow.DurationInSeconds)

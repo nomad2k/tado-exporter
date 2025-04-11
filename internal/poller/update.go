@@ -48,6 +48,9 @@ func (z Zone) GetTargetTemperature() float32 {
 	if *z.ZoneState.Setting.Power != tado.PowerON {
 		return 0
 	}
+	if z.ZoneState.Setting.Temperature == nil {
+		return 0
+	}
 	return *z.ZoneState.Setting.Temperature.Celsius
 }
 
